@@ -12,7 +12,6 @@ module Capifony
   module Symfony2
     def self.load_into(configuration)
       configuration.load do
-
         load_paths.push File.expand_path('../', __FILE__)
         load 'capifony'
         load 'symfony2/symfony'
@@ -24,41 +23,41 @@ module Capifony
         load 'symfony2/shared'
 
         # Symfony application path
-        set :app_path,              "app"
+        set :app_path,              'app'
 
         # Symfony web path
-        set :web_path,              "web"
+        set :web_path,              'web'
 
         # Symfony console bin
-        set :symfony_console,       app_path + "/console"
+        set :symfony_console,       app_path + '/console'
 
         # Symfony debug flag for console commands
         set :symfony_debug,         false
 
         # Symfony log path
-        set :log_path,              app_path + "/logs"
+        set :log_path,              app_path + '/logs'
 
         # Symfony cache path
-        set :cache_path,            app_path + "/cache"
+        set :cache_path,            app_path + '/cache'
 
         # Symfony config file path
-        set :app_config_path,       app_path + "/config"
+        set :app_config_path,       app_path + '/config'
 
         # Symfony config file (parameters.(ini|yml|etc...)
-        set :app_config_file,       "parameters.yml"
+        set :app_config_file,       'parameters.yml'
 
         # Symfony bin vendors
-        set :symfony_vendors,       "bin/vendors"
+        set :symfony_vendors,       'bin/vendors'
 
         # Symfony build_bootstrap script
-        set :build_bootstrap,       "bin/build_bootstrap"
+        set :build_bootstrap,       'bin/build_bootstrap'
 
         # Whether to use composer to install vendors.
         # If set to false, it will use the bin/vendors script
         set :use_composer,          true
 
         # Whether to use composer to install vendors to a local temp directory.
-        set :use_composer_tmp,     false
+        set :use_composer_tmp, false
 
         # Path to composer binary
         # If set to false, Capifony will download/install composer
@@ -66,19 +65,19 @@ module Capifony
 
         # Release number to composer
         # If you would like to instead update to a specific release simply specify it (for example '1.0.0-alpha8')
-        set :composer_version,      ""
+        set :composer_version,      ''
 
         # Options to pass to composer when installing/updating
-        set :composer_options,      "--no-dev --verbose --prefer-dist --optimize-autoloader --no-progress"
+        set :composer_options,      '--no-dev --verbose --prefer-dist --optimize-autoloader --no-progress'
 
         # Options to pass to composer when dumping the autoloader (dump-autoloader)
-        set :composer_dump_autoload_options, "--optimize"
+        set :composer_dump_autoload_options, '--optimize'
 
         # Whether to update vendors using the configured dependency manager (composer or bin/vendors)
         set :update_vendors,        false
 
         # run bin/vendors script in mode (upgrade, install (faster if shared /vendor folder) or reinstall)
-        set :vendors_mode,          "reinstall"
+        set :vendors_mode,          'reinstall'
 
         # Copy vendors from previous release
         set :copy_vendors,          false
@@ -102,7 +101,7 @@ module Capifony
         set :normalize_asset_timestamps, false
 
         # Need to clear *_dev controllers
-        set :clear_controllers,     true
+        set :clear_controllers, true
 
         # Controllers to clear
         set :controllers_to_clear, ['app_*.php']
@@ -111,16 +110,16 @@ module Capifony
         set :shared_files,          false
 
         # Dirs that need to remain the same between deploys (shared dirs)
-        set :shared_children,       [log_path, web_path + "/uploads"]
+        set :shared_children,       [log_path, web_path + '/uploads']
 
         # Asset folders (that need to be timestamped)
-        set :asset_children,        [web_path + "/css", web_path + "/images", web_path + "/js"]
+        set :asset_children,        [web_path + '/css', web_path + '/images', web_path + '/js']
 
         # Dirs that need to be writable by the HTTP Server (i.e. cache, log dirs)
         set :writable_dirs,         [log_path, cache_path]
 
         # Name used by the Web Server (i.e. www-data for Apache)
-        set :webserver_user,        "www-data"
+        set :webserver_user,        'www-data'
 
         # Method used to set permissions (:chmod, :acl, or :chown)
         set :permission_method,     false
@@ -129,13 +128,13 @@ module Capifony
         set :use_set_permissions,   false
 
         # Model manager: (doctrine, propel)
-        set :model_manager,         "doctrine"
+        set :model_manager,         'doctrine'
 
         # Doctrine custom entity manager
         set :doctrine_em,           false
 
         # Database backup folder
-        set :backup_path,           "backups"
+        set :backup_path,           'backups'
 
         # Use --flush option in doctrine:clear_* task
         set :doctrine_clear_use_flush_option, false
@@ -147,15 +146,15 @@ module Capifony
         # Use it carefully, really!
         set :interactive_mode,      true
 
-        def load_database_config(data, env)
+        def load_database_config(data, _env)
           read_parameters(data)['parameters']
         end
 
         def read_parameters(data)
-          if '.ini' === File.extname(app_config_file) then
-            File.readable?(data) ? IniFile::load(data) : IniFile.new(data)
+          if '.ini' === File.extname(app_config_file)
+            File.readable?(data) ? IniFile.load(data) : IniFile.new(data)
           else
-            YAML::load(data)
+            YAML.load(data)
           end
         end
 
@@ -174,11 +173,9 @@ module Capifony
         def console_options
           console_options = "--env=#{symfony_env_prod}"
 
-          if !symfony_debug
-             console_options += " --no-debug"
-          end
+          console_options += ' --no-debug' unless symfony_debug
 
-          return console_options
+          console_options
         end
 
         STDOUT.sync
@@ -209,22 +206,21 @@ module Capifony
         end
 
         def pretty_errors
-          if !$pretty_errors_defined
+          unless $pretty_errors_defined
             $pretty_errors_defined = true
 
             class << $stderr
               @@firstLine = true
-              alias _write write
 
-              def write(s)
+              write = lambda do |_s|
                 if @@firstLine
-                  _write('✘'.red << "\n")  
+                  write('✘'.red << "\n")
                   @@firstLine = false
                 end
-
-                _write(s.red)
-                $error = true
               end
+
+              write(s.red)
+              $error = true
             end
           end
         end
@@ -232,20 +228,20 @@ module Capifony
         $progress_bar = nil
         $download_msg_padding = nil
 
-        def capifony_progress_start(msg = "--> Working")
+        def capifony_progress_start(msg = '--> Working')
           $download_msg_padding = '.' * (60 - msg.size)
           # Format is equivalent to "Title............82% ETA: 00:00:12"
           $progress_bar = ProgressBar.create(
-            :title => msg,
-            :format => "%t%B %p%% %e",
-            :length => 60,
-            :progress_mark => "."
+            title: msg,
+            format: '%t%B %p%% %e',
+            length: 60,
+            progress_mark: '.'
           )
         end
 
         def capifony_progress_update(current, total)
           unless $progress_bar
-            raise "Please create a progress bar using capifony_progress_start"
+            fail 'Please create a progress bar using capifony_progress_start'
           end
 
           percent = (current.to_f / total.to_f * 100).floor
@@ -260,37 +256,31 @@ module Capifony
         end
 
         [
-          "symfony:doctrine:cache:clear_metadata",
-          "symfony:doctrine:cache:clear_query",
-          "symfony:doctrine:cache:clear_result",
-          "symfony:doctrine:schema:create",
-          "symfony:doctrine:schema:drop",
-          "symfony:doctrine:schema:update",
-          "symfony:doctrine:load_fixtures",
-          "symfony:doctrine:migrations:migrate",
-          "symfony:doctrine:migrations:status",
+          'symfony:doctrine:cache:clear_metadata',
+          'symfony:doctrine:cache:clear_query',
+          'symfony:doctrine:cache:clear_result',
+          'symfony:doctrine:schema:create',
+          'symfony:doctrine:schema:drop',
+          'symfony:doctrine:schema:update',
+          'symfony:doctrine:load_fixtures',
+          'symfony:doctrine:migrations:migrate',
+          'symfony:doctrine:migrations:status'
         ].each do |action|
           before action do
-            set :doctrine_em_flag, doctrine_em ? " --em=#{doctrine_em}" : ""
+            set :doctrine_em_flag, doctrine_em ? " --em=#{doctrine_em}" : ''
           end
         end
 
-        ["symfony:composer:install", "symfony:composer:update", "symfony:vendors:install", "symfony:vendors:upgrade"].each do |action|
+        ['symfony:composer:install', 'symfony:composer:update', 'symfony:vendors:install', 'symfony:vendors:upgrade'].each do |action|
           before action do
-            if copy_vendors
-              symfony.composer.copy_vendors
-            end
+            symfony.composer.copy_vendors if copy_vendors
           end
         end
 
-        after "deploy:finalize_update" do
-          if update_assets_version
-            symfony.assets.update_version
-          end
+        after 'deploy:finalize_update' do
+          symfony.assets.update_version if update_assets_version
 
-          if normalize_asset_timestamps
-            symfony.assets.normalize_timestamps
-          end
+          symfony.assets.normalize_timestamps if normalize_asset_timestamps
 
           if use_composer && !use_composer_tmp
             if update_vendors
@@ -302,16 +292,14 @@ module Capifony
             if update_vendors
               vendors_mode.chomp # To remove trailing whiteline
               case vendors_mode
-              when "upgrade" then symfony.vendors.upgrade
-              when "install" then symfony.vendors.install
-              when "reinstall" then symfony.vendors.reinstall
+              when 'upgrade' then symfony.vendors.upgrade
+              when 'install' then symfony.vendors.install
+              when 'reinstall' then symfony.vendors.reinstall
               end
             end
           end
 
-          if model_manager == "propel"
-            symfony.propel.build.model
-          end
+          symfony.propel.build.model if model_manager == 'propel'
 
           if assets_install
             symfony.assets.install          # Install assets
@@ -340,7 +328,7 @@ module Capifony
           end
         end
 
-        before "deploy:update_code" do
+        before 'deploy:update_code' do
           msg = "--> Updating code base with #{deploy_via} strategy"
 
           if logger.level == Capistrano::Logger::IMPORTANT
@@ -351,11 +339,10 @@ module Capifony
           end
         end
 
-        after "deploy:create_symlink" do
-          puts "--> Successfully deployed!".green
+        after 'deploy:create_symlink' do
+          puts '--> Successfully deployed!'.green
         end
       end
-
     end
   end
 end
